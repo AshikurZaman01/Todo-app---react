@@ -1,62 +1,51 @@
-import React, { useContext, useState } from "react";
-import { TodoContext } from "../TodoContext"; // Assuming this context exists
+import React, { useContext } from 'react';
+import { TodoContext } from '../TodoContext';
 
 const TodoList = () => {
     const { todos, setTodos } = useContext(TodoContext);
-    const [editId, setEditId] = useState(null); // To track currently edited todo
-    const [editText, setEditText] = useState(""); // To hold edited todo text
 
-    const handleDelete = (id) => {
-        setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+    const deleteTodo = (id) => {
+        setTodos(todos.filter(todo => todo.id !== id));
     };
 
-    const handleEdit = (id, text) => {
-        setEditId(id);
-        setEditText(text); // Pre-populate edit input with existing text
-    };
-
-    const handleUpdate = (id) => {
-        if (!editText) return; // Prevent empty updates
-
-        setTodos((prevTodos) =>
-            prevTodos.map((todo) => (todo.id === id ? { ...todo, text: editText } : todo))
-        );
-        setEditId(null); // Reset edit state after successful update
-        setEditText(""); // Clear edit input after update
-    };
-
-    const handleCancelEdit = () => {
-        setEditId(null);
-        setEditText(""); // Clear edit input on cancel
+    const cancelTodo = (id) => {
+        setTodos(todos.map(todo =>
+            todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        ));
     };
 
     return (
         <div>
-            <h2 className="text-2xl font-semibold my-4">Todo List</h2>
-            <ul>
-                {todos.map((todo) => (
-                    <li key={todo.id}>
-                        {editId === todo.id ? ( // Render edit input if editing this todo
-                            <div>
-                                <input
-                                    type="text"
-                                    value={editText}
-                                    onChange={(e) => setEditText(e.target.value)}
-                                />
+            <div>
+                <h1 className='text-2xl font-semibold text-green-600'>Todo List</h1>
+                <hr className='w-1/3 my-2' />
+            </div>
 
-                                <button className="btn btn-xs btn-primary mr-2" onClick={() => handleUpdate(todo.id)}>Update</button>
-                                <button className="btn btn-xs btn-error" onClick={handleCancelEdit}>Cancel</button>
-                            </div>
-                        ) : (
-                            <>
-                                {todo.text}
-                                <button className="btn btn-xs btn-error ml-10 mr-5" onClick={() => handleDelete(todo.id)}>Delete</button>
-                                <button className="btn btn-xs btn-info" onClick={() => handleEdit(todo.id, todo.text)}>Edit</button>
-                            </>
-                        )}
-                    </li>
-                ))}
-            </ul>
+            <div>
+                <table className='table-auto w-full'>
+                    <tbody>
+                        {todos.map((todo) => (
+                            <tr key={todo.id} className='flex justify-between items-center w-full'>
+                                <td className={`p-2 ${todo.completed ? 'line-through' : ''}`}>{todo.text}</td>
+                                <td className='p-2'>
+                                    <button
+                                        className='bg-red-500 text-white px-2 py-1 rounded mr-2'
+                                        onClick={() => deleteTodo(todo.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                    <button
+                                        className='bg-yellow-500 text-white px-2 py-1 rounded'
+                                        onClick={() => cancelTodo(todo.id)}
+                                    >
+                                        {todo.completed ? 'Undo' : 'Complete'}
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
